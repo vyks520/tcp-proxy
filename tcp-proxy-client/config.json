@@ -1,0 +1,16 @@
+{
+  "task_addr": "127.0.0.1:9000",
+  "log_level": "debug",
+  "proxy_list": [
+    {
+      "server_id": "proxy001",
+      "client_secret": "d0592e31-e70b-4945-bcde-d886cc092eb0",
+      "proxy_target_addr": "127.0.0.1:80"
+    },
+    {
+      "server_id": "proxy002",
+      "client_secret": "d0592e31-e70b-4945-bcde-d886cc092eb0",
+      "proxy_target_addr": "127.0.0.1:90"
+    }
+  ]
+}

@@ -1,0 +1,7 @@
+#主程序及日志文件目录
+tcp-proxy-server/log/
+tcp-proxy-server/tcp-proxy-server
+tcp-proxy-server/tcp-proxy-server.exe
+tcp-proxy-client/log/
+tcp-proxy-client/tcp-proxy-client
+tcp-proxy-client/tcp-proxy-client.exe
