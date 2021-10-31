@@ -9,11 +9,11 @@ import (
 	"io"
 	"net"
 	"net/http"
-	"net/url"
 	"os"
 	"strings"
 	. "tcp-proxy/modules/log"
 	. "tcp-proxy/modules/types"
+	"tcp-proxy/modules/utils"
 	"tcp-proxy/tcp-proxy-client/modules/config"
 	"time"
 )
@@ -96,10 +96,11 @@ func ProxyRegister(proxyInfo config.ProxyItem) error {
 	//添加请求头授权信息
 	reqHeader := http.Header{}
 	reqHeader.Set("Authorization", proxyInfo.ClientSecret)
-	u := url.URL{Scheme: "ws", Host: config.Config.TaskAddr, Path: fmt.Sprintf("/client-register/%s", proxyInfo.ServerID)}
+
+	u, _ := utils.UrlPathJoin(config.Config.TaskAddr, fmt.Sprintf("/client-register/%s", proxyInfo.ServerID))
 	sConn, _, err := websocket.DefaultDialer.Dial(u.String(), reqHeader)
 	if err != nil {
-		Logger.Errorf("代理服务器: %s, 连接创建失败, %s", config.Config.TaskAddr, err.Error())
+		Logger.Errorf("代理服务器: %s, 连接创建失败, %s", u.String(), err.Error())
 		return err
 	}
 
@@ -149,8 +150,8 @@ func ProxyHandler(taskID string, proxyInfo config.ProxyItem) {
 	reqHeader := http.Header{}
 	reqHeader.Set("Authorization", proxyInfo.ClientSecret)
 
-	//URL添加任务ID
-	u := url.URL{Scheme: "ws", Host: config.Config.TaskAddr, Path: fmt.Sprintf("/task-handle/%s/%s", proxyInfo.ServerID, taskID)}
+	//URL添加serverID及任务ID
+	u, _ := utils.UrlPathJoin(config.Config.TaskAddr, fmt.Sprintf("/task-handle/%s/%s", proxyInfo.ServerID, taskID))
 	sConn, _, err := websocket.DefaultDialer.Dial(u.String(), reqHeader)
 	if err != nil {
 		Logger.Errorf("代理服务器: %s, 连接创建失败, %s", u.String(), err.Error())

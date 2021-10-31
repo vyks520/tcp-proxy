@@ -2,17 +2,20 @@ package config
 
 import (
 	"encoding/json"
+	"fmt"
 	"io/ioutil"
 	"log"
+	"net/url"
 	"os"
 	"path/filepath"
+	"regexp"
 )
 
 var Config serverConfig
 
 type serverConfig struct {
-	TaskAddr  string       `json:"task_addr"`
-	LogLevel   string       `json:"log_level"`
+	TaskAddr  string      `json:"task_addr"`
+	LogLevel  string      `json:"log_level"`
 	ProxyList []ProxyItem `json:"proxy_list"`
 }
 
@@ -35,4 +38,13 @@ func init() {
 	if err != nil {
 		log.Panicf("config.json配置文件解析失败：%s", err.Error())
 	}
+	//兼容旧的配置方式
+	if matched, _ := regexp.MatchString(`^\w*://`, Config.TaskAddr); !matched {
+		Config.TaskAddr = fmt.Sprintf("ws://%s", Config.TaskAddr)
+	}
+	u, err := url.Parse(Config.TaskAddr)
+	if err != nil {
+		log.Panicf("config.json中task_addr连接地址配置不正确, %s", err.Error())
+	}
+	Config.TaskAddr = u.String()
 }
