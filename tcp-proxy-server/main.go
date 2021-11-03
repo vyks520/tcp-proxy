@@ -14,7 +14,7 @@ import (
 type program struct{}
 
 func main() {
-	LoggerInit(Config.LogLevel)
+	LoggerInit(Config.LogLevel, Config.LogOutput)
 	svcConfig := &service.Config{
 		Name:        "tcp-proxy-server", //服务显示名称
 		DisplayName: "tcp-proxy-server", //服务名称
@@ -80,4 +80,3 @@ func (p *program) run() {
 		Logger.Error(fmt.Sprintf("服务启动失败：%s", err.Error()))
 	}
 }
-

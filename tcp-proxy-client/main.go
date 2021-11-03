@@ -14,14 +14,14 @@ import (
 	. "tcp-proxy/modules/log"
 	. "tcp-proxy/modules/types"
 	"tcp-proxy/modules/utils"
-	"tcp-proxy/tcp-proxy-client/modules/config"
+	."tcp-proxy/tcp-proxy-client/modules/config"
 	"time"
 )
 
 type program struct{}
 
 func main() {
-	LoggerInit(config.Config.LogLevel)
+	LoggerInit(Config.LogLevel, Config.LogOutput)
 	svcConfig := &service.Config{
 		Name:        "tcp-proxy-client", //服务显示名称
 		DisplayName: "tcp-proxy-client", //服务名称
@@ -74,12 +74,12 @@ func (p *program) run() {
 }
 
 func ProxyStart() {
-	if len(config.Config.ProxyList) == 0 {
+	if len(Config.ProxyList) == 0 {
 		Logger.Error("代理信息配置列表不能为空！")
 		os.Exit(1)
 	}
-	for _, proxyInfo := range config.Config.ProxyList {
-		go func(proxyInfo config.ProxyItem) {
+	for _, proxyInfo := range Config.ProxyList {
+		go func(proxyInfo ProxyItem) {
 			var err error
 			for {
 				err = ProxyRegister(proxyInfo)
@@ -92,12 +92,12 @@ func ProxyStart() {
 	}
 }
 
-func ProxyRegister(proxyInfo config.ProxyItem) error {
+func ProxyRegister(proxyInfo ProxyItem) error {
 	//添加请求头授权信息
 	reqHeader := http.Header{}
 	reqHeader.Set("Authorization", proxyInfo.ClientSecret)
 
-	u, _ := utils.UrlPathJoin(config.Config.TaskAddr, fmt.Sprintf("/client-register/%s", proxyInfo.ServerID))
+	u, _ := utils.UrlPathJoin(Config.TaskAddr, fmt.Sprintf("/client-register/%s", proxyInfo.ServerID))
 	sConn, _, err := websocket.DefaultDialer.Dial(u.String(), reqHeader)
 	if err != nil {
 		Logger.Errorf("代理服务器: %s, 连接创建失败, %s", u.String(), err.Error())
@@ -122,7 +122,7 @@ func ProxyRegister(proxyInfo config.ProxyItem) error {
 		Logger.Error(verifyData.Msg)
 		return errors.New(verifyData.Msg)
 	}
-	Logger.Infof("server_id: %s, 代理服务器: %s, 代理目标服务器: %s, 任务请求服务注册成功, 等待任务处理...", proxyInfo.ServerID, config.Config.TaskAddr, proxyInfo.ProxyTargetAddr)
+	Logger.Infof("server_id: %s, 代理服务器: %s, 代理目标服务器: %s, 任务请求服务注册成功, 等待任务处理...", proxyInfo.ServerID, Config.TaskAddr, proxyInfo.ProxyTargetAddr)
 	for {
 		taskData := TaskDataJson{}
 		err = sConn.ReadJSON(&taskData)
@@ -140,18 +140,18 @@ func ProxyRegister(proxyInfo config.ProxyItem) error {
 				Logger.Errorf("server_id: %s, taskID: %s, 代理服务端响应的任务状态异常, %s", proxyInfo.ServerID, taskData.TaskID, taskData.Msg)
 			}
 		default:
-			Logger.Errorf("server_id: %s, 收到的任务方法“%s”不支持！", proxyInfo.ServerID, taskData.Method)
+			Logger.Errorf("server_id: %s, 收到的任务方法'%s'不支持！", proxyInfo.ServerID, taskData.Method)
 		}
 	}
 }
 
-func ProxyHandler(taskID string, proxyInfo config.ProxyItem) {
+func ProxyHandler(taskID string, proxyInfo ProxyItem) {
 	//添加请求头授权信息
 	reqHeader := http.Header{}
 	reqHeader.Set("Authorization", proxyInfo.ClientSecret)
 
 	//URL添加serverID及任务ID
-	u, _ := utils.UrlPathJoin(config.Config.TaskAddr, fmt.Sprintf("/task-handle/%s/%s", proxyInfo.ServerID, taskID))
+	u, _ := utils.UrlPathJoin(Config.TaskAddr, fmt.Sprintf("/task-handle/%s/%s", proxyInfo.ServerID, taskID))
 	sConn, _, err := websocket.DefaultDialer.Dial(u.String(), reqHeader)
 	if err != nil {
 		Logger.Errorf("代理服务器: %s, 连接创建失败, %s", u.String(), err.Error())

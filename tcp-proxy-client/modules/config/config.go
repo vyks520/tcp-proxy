@@ -16,6 +16,7 @@ var Config serverConfig
 type serverConfig struct {
 	TaskAddr  string      `json:"task_addr"`
 	LogLevel  string      `json:"log_level"`
+	LogOutput string      `json:"log_output"` //on: 输出到屏幕及日志文件; stdout: 只输出到屏幕; file: 只输出到文件; off:关闭日志功能
 	ProxyList []ProxyItem `json:"proxy_list"`
 }
 

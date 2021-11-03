@@ -1,6 +1,8 @@
 {
   "task_addr": "127.0.0.1:9000",
   "log_level": "debug",
+  "log": "debug",
+  "log_output": "on",
   "proxy_list": [
     {
       "server_id": "proxy001",

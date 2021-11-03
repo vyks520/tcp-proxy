@@ -25,7 +25,7 @@ func ReqAuth(c *gin.Context, cConn *websocket.Conn) (ProxyItem, error) {
 	clientSecret := c.GetHeader("Authorization")
 	serverInfo, ok = ServerMap[serverID]
 	if !ok {
-		errMsg := fmt.Sprintf("server_id“%s”不存在，禁止访问", serverID)
+		errMsg := fmt.Sprintf("server_id'%s'不存在，禁止访问", serverID)
 		Logger.Errorf(errMsg)
 		err := cConn.WriteJSON(TaskDataJson{
 			Status: 1,

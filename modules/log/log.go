@@ -11,6 +11,7 @@ import (
 )
 
 var Logger *logrus.Logger
+
 var LogLevelList map[string]logrus.Level = map[string]logrus.Level{
 	"panic": logrus.PanicLevel,
 	"fatal": logrus.FatalLevel,
@@ -21,25 +22,15 @@ var LogLevelList map[string]logrus.Level = map[string]logrus.Level{
 	"trace": logrus.TraceLevel,
 }
 
-func LoggerInit(level string) {
+type LogOutputOff struct {
+}
+
+func (log *LogOutputOff) Write(p []byte) (int, error) {
+	return len(p), nil
+}
+
+func LoggerInit(level, LogOutput string) {
 	Logger = logrus.New()
-	appPath, err := filepath.Abs(filepath.Dir(os.Args[0]))
-	if err != nil {
-		Logger.Panicf("服务执行路径获取失败：%s", err.Error())
-	}
-	hook := lumberjack.Logger{
-		Filename:   appPath + "/log/log.log",      // 日志文件路径
-		MaxSize:    int(math.Max(float64(10), 1)), // 每个日志文件保存的最大尺寸 单位：M
-		MaxBackups: int(math.Max(float64(5), 1)),  // 日志文件最多保存多少个备份
-		MaxAge:     int(math.Max(float64(30), 1)), // 文件最多保存多少天
-		Compress:   true,                          // 是否压缩
-	}
-	Logger.SetOutput(io.MultiWriter(&hook, os.Stdout))
-	logLevel, ok := LogLevelList[level]
-	if !ok {
-		Logger.Fatalf("日志log_level“%s”不存在,请检查config.json配置", level)
-	}
-	Logger.SetLevel(logLevel)
 	Logger.SetFormatter(
 		&logrus.TextFormatter{
 			TimestampFormat: "2006-01-02 15:04:05",
@@ -51,6 +42,35 @@ func LoggerInit(level string) {
 			},
 		},
 	)
+	appPath, err := filepath.Abs(filepath.Dir(os.Args[0]))
+	if err != nil {
+		Logger.Panicf("服务执行路径获取失败：%s", err.Error())
+	}
+	hook := lumberjack.Logger{
+		Filename:   appPath + "/log/log.log",      // 日志文件路径
+		MaxSize:    int(math.Max(float64(10), 1)), // 每个日志文件保存的最大尺寸 单位：MB
+		MaxBackups: int(math.Max(float64(5), 1)),  // 日志文件最多保存多少个备份
+		MaxAge:     int(math.Max(float64(30), 1)), // 文件最多保存多少天
+		Compress:   true,                          // 是否压缩
+	}
+	switch LogOutput {
+	case "on":
+		Logger.SetOutput(io.MultiWriter(&hook, os.Stdout))
+	case "off":
+		logOutputOff := LogOutputOff{}
+		Logger.SetOutput(&logOutputOff)
+	case "stdout":
+		Logger.SetOutput(os.Stdout)
+	case "file":
+		Logger.SetOutput(&hook)
+	default:
+		Logger.SetOutput(io.MultiWriter(&hook, os.Stdout))
+	}
+	logLevel, ok := LogLevelList[level]
+	if !ok {
+		Logger.Fatalf("日志log_level'%s'不存在,请检查config.json配置", level)
+	}
+	Logger.SetLevel(logLevel)
 }
 
 func GinLogFormatter(params gin.LogFormatterParams) string {

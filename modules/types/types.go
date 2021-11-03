@@ -6,4 +6,3 @@ type TaskDataJson struct {
 	Method string `json:"method"`
 	TaskID string `json:"task_id"`
 }
-
