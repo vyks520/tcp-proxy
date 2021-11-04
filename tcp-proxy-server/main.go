@@ -33,7 +33,7 @@ func main() {
 			if err != nil {
 				Logger.Fatal(err.Error())
 			}
-			Logger.Println("服务安装成功")
+			Logger.Println("服务安装成功！")
 			return
 		}
 
@@ -42,7 +42,7 @@ func main() {
 			if err != nil {
 				Logger.Fatalln(err.Error())
 			}
-			Logger.Info("服务卸载成功")
+			Logger.Info("服务卸载成功！")
 			return
 		}
 	}
@@ -70,8 +70,8 @@ func (p *program) run() {
 		return engine
 	}()
 	router.Use(Cors())
-	router.GET("/client-register/:serverID", ClientRegister)
-	router.GET("/task-handle/:serverID/:taskID", TaskHandle)
+	router.GET("/client-register/:serverID/:clientSecret/:timestamp", ClientRegister)
+	router.GET("/task-handle/:taskID", TaskHandle)
 
 	addr := fmt.Sprintf("%s:%d", Config.Host, Config.Port)
 	Logger.Infof("服务运行在：%s", addr)

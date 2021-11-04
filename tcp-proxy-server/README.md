@@ -2,10 +2,10 @@
 
 一款配置超级简单的tcp内网穿透代理程序，可以将内网tcp端口转发到公网服务器上。测试过内网HTTP服务、windows远程桌面、ssh访问等场景的代理。新手上路，请多指教！
 
-
 注意：`需要配合客户端使用`
 
 ## 注册系统服务Linux
+
 ```
 # Linux
 ./tcp-proxy-server.exe install
@@ -30,6 +30,7 @@ net stop tcp-proxy-server
 ```
 
 ## 配置文件config.json
+
 `注意: 配置文件位于主程序相同目录下`
 
 ```json5

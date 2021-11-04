@@ -1,7 +1,6 @@
 package global
 
 import (
-	"fmt"
 	"net"
 	"time"
 )
@@ -46,6 +45,5 @@ func ProxyTaskQueueClose(serverID string /*服务器ID*/) {
 		_ = item.Conn.Close()
 		delete(ProxyTaskQueue[serverID], id)
 	}
-	fmt.Println(serverID)
 	delete(ProxyTaskQueue, serverID)
 }
