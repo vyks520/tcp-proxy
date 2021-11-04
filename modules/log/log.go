@@ -12,7 +12,7 @@ import (
 
 var Logger *logrus.Logger
 
-var LogLevelList map[string]logrus.Level = map[string]logrus.Level{
+var LevelList = map[string]logrus.Level{
 	"panic": logrus.PanicLevel,
 	"fatal": logrus.FatalLevel,
 	"error": logrus.ErrorLevel,
@@ -22,15 +22,16 @@ var LogLevelList map[string]logrus.Level = map[string]logrus.Level{
 	"trace": logrus.TraceLevel,
 }
 
-type LogOutputOff struct {
+type OutputOff struct {
 }
 
-func (log *LogOutputOff) Write(p []byte) (int, error) {
+func (log *OutputOff) Write(p []byte) (int, error) {
 	return len(p), nil
 }
 
 func LoggerInit(level, LogOutput string) {
 	Logger = logrus.New()
+	Logger.Hooks.Add(NewContextHook())
 	Logger.SetFormatter(
 		&logrus.TextFormatter{
 			TimestampFormat: "2006-01-02 15:04:05",
@@ -57,7 +58,7 @@ func LoggerInit(level, LogOutput string) {
 	case "on":
 		Logger.SetOutput(io.MultiWriter(&hook, os.Stdout))
 	case "off":
-		logOutputOff := LogOutputOff{}
+		logOutputOff := OutputOff{}
 		Logger.SetOutput(&logOutputOff)
 	case "stdout":
 		Logger.SetOutput(os.Stdout)
@@ -66,7 +67,7 @@ func LoggerInit(level, LogOutput string) {
 	default:
 		Logger.SetOutput(io.MultiWriter(&hook, os.Stdout))
 	}
-	logLevel, ok := LogLevelList[level]
+	logLevel, ok := LevelList[level]
 	if !ok {
 		Logger.Fatalf("日志log_level'%s'不存在,请检查config.json配置", level)
 	}
